@@ -98,7 +98,7 @@
     scrollTrigger: { trigger: ".about", start: "top 70%" },
   });
   gsap.fromTo(
-    ".about__media img",
+    ".about__media img:not(.about__badge)",
     { yPercent: -8, scale: 1.12 },
     {
       yPercent: 8,
