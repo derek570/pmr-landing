@@ -712,6 +712,7 @@ a { color: inherit; }
 }
 .cred__icon { font-size: 28px; line-height: 1; }
 .cred h3 { font-size: 20px; margin: 14px 0 8px; }
+.cred h3:first-child { margin-top: 0; }
 .cred p { color: var(--muted); font-size: 15px; }
 .promise {
   text-align: center;
