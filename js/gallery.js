@@ -1,7 +1,8 @@
 /* PMR Bike Couriers — gallery page
    Builds one reel per group from assets/gallery/gallery.json. Each reel slides
-   sideways as the visitor scrolls down, alternating direction, and any photo
-   opens full size in the lightbox. To change the photos, run
+   sideways as the visitor scrolls down, alternating direction. Visitors can
+   also swipe a reel or use its arrow buttons, and the scroll movement carries
+   on from wherever they left it. Any photo opens full size in the lightbox. To change the photos, run
    scripts/import-gallery.py rather than editing the JSON by hand. */
 (function () {
   const host = document.getElementById("gallery-groups");
@@ -30,7 +31,11 @@
           <h2 class="reel-group__title">${esc(words.join(" "))} <em>${esc(last)}</em></h2>
           ${g.caption ? `<p class="reel-group__meta">${esc(g.caption)}</p>` : ""}
         </div>
-        <div class="reel-row${gi % 3 === 1 ? " reel-row--tall" : ""}"><div class="reel-row__track"></div></div>`;
+        <div class="reel-row${gi % 3 === 1 ? " reel-row--tall" : ""}">
+          <div class="reel-row__scroller"><div class="reel-row__track"></div></div>
+          <button type="button" class="reel-row__arrow reel-row__arrow--prev" aria-label="Previous photos">‹</button>
+          <button type="button" class="reel-row__arrow reel-row__arrow--next" aria-label="Next photos">›</button>
+        </div>`;
       const track = section.querySelector(".reel-row__track");
       g.photos.forEach((p) => {
         const idx = all.push({ src: p.src, alt: p.alt || "", group: g.title }) - 1;
@@ -51,22 +56,44 @@
     }
   }
 
-  // Slide the row sideways by its overflow while the group scrolls through the viewport.
+  // The row is a native horizontal scroller, so touch swipes, trackpads and the
+  // arrow buttons all work. Page scrolling drives its scrollLeft; a manual swipe
+  // becomes an offset, so page scrolling resumes from where the visitor left it.
   function animateRow(section, track, dir) {
-    if (reduceMotion || typeof gsap === "undefined") {
-      track.parentElement.style.overflowX = "auto";
-      return;
-    }
-    const overflow = () => Math.max(0, track.scrollWidth - window.innerWidth);
-    gsap.fromTo(
-      track,
-      { x: () => (dir === -1 ? 0 : -overflow()) },
-      {
-        x: () => (dir === -1 ? -overflow() : 0),
-        ease: "none",
-        scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: 0.8, invalidateOnRefresh: true },
-      }
-    );
+    const scroller = track.parentElement;
+    const step = () => Math.max(240, scroller.clientWidth * 0.75);
+    section.querySelector(".reel-row__arrow--prev").addEventListener("click", () => scroller.scrollBy({ left: -step(), behavior: "smooth" }));
+    section.querySelector(".reel-row__arrow--next").addEventListener("click", () => scroller.scrollBy({ left: step(), behavior: "smooth" }));
+    if (reduceMotion || typeof gsap === "undefined") return;
+
+    const max = () => scroller.scrollWidth - scroller.clientWidth;
+    const state = { p: 0 };
+    let offset = 0;
+    let lastSet = -1;
+    let userUntil = 0;
+    const target = () => (dir === -1 ? state.p : 1 - state.p) * max() + offset;
+
+    // A scroll position we didn't set came from the visitor: keep it as the new offset.
+    scroller.addEventListener("scroll", () => {
+      if (Math.abs(scroller.scrollLeft - lastSet) <= 1) return;
+      userUntil = Date.now() + 500;
+      offset += scroller.scrollLeft - target();
+    }, { passive: true });
+
+    gsap.to(state, {
+      p: 1,
+      ease: "none",
+      scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: 0.8 },
+      onUpdate: () => {
+        if (Date.now() < userUntil) return;
+        const m = max();
+        // Clamp the offset so the row can't drift past either end.
+        offset = Math.min(Math.max(offset, -m), m);
+        const x = Math.min(Math.max(target(), 0), m);
+        scroller.scrollLeft = x;
+        lastSet = scroller.scrollLeft;
+      },
+    });
     gsap.from(section.querySelector(".reel-group__head"), {
       opacity: 0,
       y: 40,
