@@ -2,36 +2,186 @@
   "groups": [
     {
       "title": "On track",
-      "caption": "Bikes we've delivered, doing what they're built for.",
+      "caption": "Riding, racing and life in the paddock.",
       "photos": [
-        { "src": "assets/img/CqeS6rdrDdI-1.jpg", "alt": "Two race bikes cornering on track" },
-        { "src": "assets/img/CqeSlxVL_F--1.jpg", "alt": "Bike on track at Mugello circuit" },
-        { "src": "assets/img/CqeV85ArYfw-1.jpg", "alt": "PMR rider on a PMR-liveried race bike" },
-        { "src": "assets/img/hero-poster.jpg", "alt": "Superbike at speed on track" }
+        {
+          "src": "assets/gallery/on-track/on-track-01.jpg",
+          "alt": "Two superbikes cornering side by side"
+        },
+        {
+          "src": "assets/gallery/on-track/on-track-02.jpg",
+          "alt": "Rider cornering hard, close up"
+        },
+        {
+          "src": "assets/gallery/on-track/on-track-03.jpg",
+          "alt": "Rider leaning into a corner"
+        },
+        {
+          "src": "assets/gallery/on-track/on-track-04.jpg",
+          "alt": "Rider cornering under a cloudy sky"
+        },
+        {
+          "src": "assets/gallery/on-track/on-track-05.jpg",
+          "alt": "Rider with his race bike in the pit lane"
+        },
+        {
+          "src": "assets/gallery/on-track/on-track-06.jpg",
+          "alt": "Rider on a red superbike in the pit lane at sunset"
+        },
+        {
+          "src": "assets/gallery/on-track/on-track-07.jpg",
+          "alt": "Two riders in leathers in the pit lane"
+        },
+        {
+          "src": "assets/gallery/on-track/on-track-08.jpg",
+          "alt": "Handshake in the pit lane"
+        },
+        {
+          "src": "assets/gallery/on-track/on-track-09.jpg",
+          "alt": "Race team line up outside the garage"
+        },
+        {
+          "src": "assets/gallery/on-track/on-track-10.jpg",
+          "alt": "Race team line up with their superbikes"
+        }
       ]
     },
     {
-      "title": "In the paddock",
-      "caption": "Unloaded, on stands and waiting when you arrive.",
+      "title": "Ready to ride",
+      "caption": "Prepared, checked and delivered ready to ride.",
       "photos": [
-        { "src": "assets/img/Cxdm_D8ogun-1.jpg", "alt": "KTM race bikes on stands at the circuit" },
-        { "src": "assets/img/Cxdm_D8ogun-2.jpg", "alt": "Row of race bikes in the pit lane" },
-        { "src": "assets/img/Cxdm_D8ogun-3.jpg", "alt": "Aprilia race bike in the pits" },
-        { "src": "assets/img/CqeV85ArYfw-3.jpg", "alt": "Rider with race bike in the garage" }
+        {
+          "src": "assets/gallery/ready-to-ride/ready-to-ride-01.jpg",
+          "alt": "Race bike in front of the PMR banner"
+        },
+        {
+          "src": "assets/gallery/ready-to-ride/ready-to-ride-02.jpg",
+          "alt": "Four race bikes lined up at the PMR banner"
+        },
+        {
+          "src": "assets/gallery/ready-to-ride/ready-to-ride-03.jpg",
+          "alt": "Race bike number 18 at the PMR banner"
+        },
+        {
+          "src": "assets/gallery/ready-to-ride/ready-to-ride-04.jpg",
+          "alt": "Yellow race bike at the PMR banner"
+        },
+        {
+          "src": "assets/gallery/ready-to-ride/ready-to-ride-05.jpg",
+          "alt": "Race bike on a paddock stand at the PMR banner"
+        },
+        {
+          "src": "assets/gallery/ready-to-ride/ready-to-ride-06.jpg",
+          "alt": "Two race bikes at the PMR banner"
+        },
+        {
+          "src": "assets/gallery/ready-to-ride/ready-to-ride-07.jpg",
+          "alt": "PMR branded race bike in the paddock"
+        },
+        {
+          "src": "assets/gallery/ready-to-ride/ready-to-ride-08.jpg",
+          "alt": "Superbikes lined up on paddock stands"
+        },
+        {
+          "src": "assets/gallery/ready-to-ride/ready-to-ride-09.jpg",
+          "alt": "Superbikes delivered to a customer's driveway"
+        },
+        {
+          "src": "assets/gallery/ready-to-ride/ready-to-ride-10.jpg",
+          "alt": "Aruba liveried superbike delivered to the door"
+        },
+        {
+          "src": "assets/gallery/ready-to-ride/ready-to-ride-11.jpg",
+          "alt": "Two red superbikes delivered in the sunshine"
+        }
       ]
     },
     {
-      "title": "Loading and transport",
-      "caption": "Wrapped, strapped and photographed before every journey.",
+      "title": "Wrapped and protected",
+      "caption": "Covered, strapped and secured before every journey.",
       "photos": [
-        { "src": "assets/img/CrFWubMK9bY-1.jpg", "alt": "Row of superbikes lined up beside the PMR transporter" },
-        { "src": "assets/img/CrFWubMK9bY-2.jpg", "alt": "PMR vans and bikes at the depot" },
-        { "src": "assets/img/CrFWubMK9bY-3.jpg", "alt": "Ducati and superbikes lined up for loading" },
-        { "src": "assets/img/CrFWubMK9bY-4.jpg", "alt": "Sports bikes loaded beside the transport truck" },
-        { "src": "assets/img/CrFWubMK9bY-5.jpg", "alt": "Bikes staged beside the transporter" },
-        { "src": "assets/img/CrFWubMK9bY-6.jpg", "alt": "Motorcycle shrink-wrapped in protective film" },
-        { "src": "assets/img/CrFWubMK9bY-7.jpg", "alt": "Wrapped motorcycles secured in the depot" },
-        { "src": "assets/img/CrFWubMK9bY-8.jpg", "alt": "Protective wrapped bike close-up" }
+        {
+          "src": "assets/gallery/wrapped-and-protected/wrapped-and-protected-01.jpg",
+          "alt": "Bikes under fitted covers"
+        },
+        {
+          "src": "assets/gallery/wrapped-and-protected/wrapped-and-protected-02.jpg",
+          "alt": "Covered bikes waiting for loading"
+        },
+        {
+          "src": "assets/gallery/wrapped-and-protected/wrapped-and-protected-03.jpg",
+          "alt": "Covered bikes beside the lorry"
+        },
+        {
+          "src": "assets/gallery/wrapped-and-protected/wrapped-and-protected-04.jpg",
+          "alt": "Covered bikes at the loading bay"
+        },
+        {
+          "src": "assets/gallery/wrapped-and-protected/wrapped-and-protected-05.jpg",
+          "alt": "Superbike strapped to a transport frame"
+        },
+        {
+          "src": "assets/gallery/wrapped-and-protected/wrapped-and-protected-06.jpg",
+          "alt": "Superbike strapped to a transport frame at the depot"
+        },
+        {
+          "src": "assets/gallery/wrapped-and-protected/wrapped-and-protected-07.jpg",
+          "alt": "Wrapped bikes stacked in transport racks"
+        },
+        {
+          "src": "assets/gallery/wrapped-and-protected/wrapped-and-protected-08.jpg",
+          "alt": "Kit and bikes packed on pallets"
+        },
+        {
+          "src": "assets/gallery/wrapped-and-protected/wrapped-and-protected-09.jpg",
+          "alt": "Bike and kit strapped to a pallet"
+        },
+        {
+          "src": "assets/gallery/wrapped-and-protected/wrapped-and-protected-10.jpg",
+          "alt": "Shrink wrapped pallet ready to ship"
+        }
+      ]
+    },
+    {
+      "title": "At the depot",
+      "caption": "Safe under cover between events.",
+      "photos": [
+        {
+          "src": "assets/gallery/at-the-depot/at-the-depot-01.jpg",
+          "alt": "The PMR depot at night"
+        },
+        {
+          "src": "assets/gallery/at-the-depot/at-the-depot-02.jpg",
+          "alt": "Bikes lined up in the storage hangar"
+        },
+        {
+          "src": "assets/gallery/at-the-depot/at-the-depot-03.jpg",
+          "alt": "Bikes stored in the hangar"
+        },
+        {
+          "src": "assets/gallery/at-the-depot/at-the-depot-04.jpg",
+          "alt": "Superbike in the empty hangar"
+        },
+        {
+          "src": "assets/gallery/at-the-depot/at-the-depot-05.jpg",
+          "alt": "Two superbikes in the floodlit hangar"
+        },
+        {
+          "src": "assets/gallery/at-the-depot/at-the-depot-06.jpg",
+          "alt": "Superbike in front of a race team lorry"
+        },
+        {
+          "src": "assets/gallery/at-the-depot/at-the-depot-07.jpg",
+          "alt": "Three red superbikes at the lorry park"
+        },
+        {
+          "src": "assets/gallery/at-the-depot/at-the-depot-08.jpg",
+          "alt": "Red race bikes in the yard"
+        },
+        {
+          "src": "assets/gallery/at-the-depot/at-the-depot-09.jpg",
+          "alt": "Race bikes lined up beside the transport frames"
+        }
       ]
     }
   ]

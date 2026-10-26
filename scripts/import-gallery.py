@@ -7,7 +7,7 @@ Source layout (one folder per reel on the gallery page):
         1 On track/            <- leading number sets the order, it is not shown
             caption.txt        <- optional one-line caption under the reel title
             IMG_0412.HEIC
-            silverstone-pitlane.jpg
+            02-silverstone-pitlane.jpg   <- a leading number sets the order within a reel
         2 In the paddock/
         ...
 
@@ -46,10 +46,18 @@ def group_title(folder_name):
 
 
 def alt_from_name(stem, title, n):
+    # "03-rider-cornering" -> "rider-cornering": a leading number only sets the order
+    stem = re.sub(r"^\d{1,3}[\s._-]+(?=[a-zA-Z])", "", stem)
     if CAMERA_NAME.match(stem):
         return f"{title} photo {n}"
     words = re.sub(r"[_-]+", " ", stem).strip()
     return words[:1].upper() + words[1:]
+
+
+def long_edge(path):
+    out = subprocess.run(["sips", "-g", "pixelWidth", "-g", "pixelHeight", str(path)],
+                         check=True, capture_output=True, text=True).stdout
+    return max(int(n) for n in re.findall(r"pixel(?:Width|Height): (\d+)", out))
 
 
 def main():
@@ -95,8 +103,10 @@ def main():
         entries = []
         for n, src in enumerate(photos, 1):
             dest = dest_dir / f"{slug}-{n:02d}.jpg"
+            # shrink large photos only; sips -Z would also enlarge small ones
+            resize = ["-Z", MAX_EDGE] if long_edge(src) > int(MAX_EDGE) else []
             subprocess.run(
-                ["sips", "-s", "format", "jpeg", "-s", "formatOptions", "80", "-Z", MAX_EDGE,
+                ["sips", "-s", "format", "jpeg", "-s", "formatOptions", "80", *resize,
                  str(src), "--out", str(dest)],
                 check=True, stdout=subprocess.DEVNULL)
             entries.append({"src": dest.relative_to(REPO).as_posix(), "alt": alt_from_name(src.stem, title, n)})
