@@ -1,0 +1,18 @@
+{
+  
+  "name": "pmr-site-review",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-01",
+  "vars": {
+    "ALLOWED_ORIGINS": "https://derek570.github.io,https://pmrbikecouriers.co.uk,https://www.pmrbikecouriers.co.uk"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "pmr-site-review",
+      "database_id": "289b1e50-3780-4239-8948-04abee3a0d02"
+    }
+  ]
+  // Secret, set with `wrangler secret put REVIEW_KEY` (never committed):
+  //   REVIEW_KEY  shared key in John's review link (?review=<key>)
+}

@@ -2,6 +2,8 @@
 (function () {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  navToggle();
+
   if (reduceMotion || typeof gsap === "undefined") {
     document.querySelector(".intro")?.remove();
     document.querySelectorAll(".stat__num[data-count]").forEach(setFinalCount);
@@ -10,12 +12,15 @@
   }
 
   gsap.registerPlugin(ScrollTrigger);
+  // this script runs on every page; home-only selectors are simply absent elsewhere
+  gsap.config({ nullTargetWarn: false });
 
-  /* ---------- intro wipe: bike races across, panels peel away ---------- */
+  /* ---------- intro wipe (home page only): bike races across, panels peel away ---------- */
+  const hasIntro = !!document.querySelector(".intro");
   const intro = gsap.timeline({
     onComplete: () => document.querySelector(".intro")?.remove(),
   });
-  intro
+  if (hasIntro) intro
     .to(".intro__bike", {
       x: () => window.innerWidth + 320,
       duration: 0.9,
@@ -31,7 +36,7 @@
     duration: 1,
     stagger: 0.14,
     ease: "power4.out",
-    delay: 1.1,
+    delay: hasIntro ? 1.1 : 0.1,
   });
   gsap.from(".hero__kicker, .hero__sub, .hero__actions", {
     opacity: 0,
@@ -39,7 +44,7 @@
     duration: 0.8,
     stagger: 0.12,
     ease: "power2.out",
-    delay: 1.5,
+    delay: hasIntro ? 1.5 : 0.5,
   });
   gsap.from(".hero__stats .stat", {
     opacity: 0,
@@ -47,7 +52,7 @@
     duration: 0.7,
     stagger: 0.1,
     ease: "power2.out",
-    delay: 1.8,
+    delay: hasIntro ? 1.8 : 0.8,
   });
 
   /* subtle hero video parallax on scroll */
@@ -66,7 +71,7 @@
     gsap.to(obj, {
       v: target,
       duration: 1.6,
-      delay: 1.9,
+      delay: hasIntro ? 1.9 : 0.9,
       ease: "power2.out",
       onUpdate: () => (el.textContent = prefix + Math.round(obj.v) + suffix),
     });
@@ -189,6 +194,17 @@
     scrollTrigger: { trigger: ".cta", start: "top 70%" },
   });
 
+  /* ---------- inner pages: generic fade-ups ---------- */
+  gsap.utils.toArray(".fade-up").forEach((el) => {
+    gsap.from(el, {
+      opacity: 0,
+      y: 40,
+      duration: 0.8,
+      ease: "power2.out",
+      scrollTrigger: { trigger: el, start: "top 88%" },
+    });
+  });
+
   startReels();
   smoothAnchors();
 
@@ -237,6 +253,21 @@ function smoothAnchors() {
       target.scrollIntoView({ behavior: "smooth" });
     });
   });
+}
+
+/* Mobile menu: hamburger opens the nav as a drop-down panel */
+function navToggle() {
+  const nav = document.querySelector(".nav");
+  const btn = document.querySelector(".nav__toggle");
+  if (!nav || !btn) return;
+  const set = (open) => {
+    nav.classList.toggle("nav--open", open);
+    btn.setAttribute("aria-expanded", String(open));
+    btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  };
+  btn.addEventListener("click", () => set(!nav.classList.contains("nav--open")));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") set(false); });
+  nav.querySelectorAll(".nav__links a").forEach((a) => a.addEventListener("click", () => set(false)));
 }
 
 function setFinalCount(el) {

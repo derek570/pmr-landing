@@ -1,0 +1,38 @@
+{
+  "groups": [
+    {
+      "title": "On track",
+      "caption": "Bikes we've delivered, doing what they're built for.",
+      "photos": [
+        { "src": "assets/img/CqeS6rdrDdI-1.jpg", "alt": "Two race bikes cornering on track" },
+        { "src": "assets/img/CqeSlxVL_F--1.jpg", "alt": "Bike on track at Mugello circuit" },
+        { "src": "assets/img/CqeV85ArYfw-1.jpg", "alt": "PMR rider on a PMR-liveried race bike" },
+        { "src": "assets/img/hero-poster.jpg", "alt": "Superbike at speed on track" }
+      ]
+    },
+    {
+      "title": "In the paddock",
+      "caption": "Unloaded, on stands and waiting when you arrive.",
+      "photos": [
+        { "src": "assets/img/Cxdm_D8ogun-1.jpg", "alt": "KTM race bikes on stands at the circuit" },
+        { "src": "assets/img/Cxdm_D8ogun-2.jpg", "alt": "Row of race bikes in the pit lane" },
+        { "src": "assets/img/Cxdm_D8ogun-3.jpg", "alt": "Aprilia race bike in the pits" },
+        { "src": "assets/img/CqeV85ArYfw-3.jpg", "alt": "Rider with race bike in the garage" }
+      ]
+    },
+    {
+      "title": "Loading and transport",
+      "caption": "Wrapped, strapped and photographed before every journey.",
+      "photos": [
+        { "src": "assets/img/CrFWubMK9bY-1.jpg", "alt": "Row of superbikes lined up beside the PMR transporter" },
+        { "src": "assets/img/CrFWubMK9bY-2.jpg", "alt": "PMR vans and bikes at the depot" },
+        { "src": "assets/img/CrFWubMK9bY-3.jpg", "alt": "Ducati and superbikes lined up for loading" },
+        { "src": "assets/img/CrFWubMK9bY-4.jpg", "alt": "Sports bikes loaded beside the transport truck" },
+        { "src": "assets/img/CrFWubMK9bY-5.jpg", "alt": "Bikes staged beside the transporter" },
+        { "src": "assets/img/CrFWubMK9bY-6.jpg", "alt": "Motorcycle shrink-wrapped in protective film" },
+        { "src": "assets/img/CrFWubMK9bY-7.jpg", "alt": "Wrapped motorcycles secured in the depot" },
+        { "src": "assets/img/CrFWubMK9bY-8.jpg", "alt": "Protective wrapped bike close-up" }
+      ]
+    }
+  ]
+}
