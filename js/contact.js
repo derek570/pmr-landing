@@ -1,7 +1,8 @@
 /* PMR Bike Couriers — quote form
    The site is static, so the form builds a WhatsApp message to the PMR number
    rather than posting to a server. The "Send it by email" link builds the same
-   text as an email for visitors without WhatsApp. A ?service= link from the
+   text as an email for visitors without WhatsApp. On a computer the form
+   sends by email from the start. A ?service= link from the
    services page preselects the matching option. */
 (function () {
   const form = document.getElementById("quote-form");
@@ -38,10 +39,22 @@
     return { subject: `Quote request — ${f.service.value}`, text: lines.join("\n") };
   }
 
+  // On a computer (see isComputer in main.js) the form sends by email instead.
+  const byEmail = typeof isComputer === "function" && isComputer();
+  if (byEmail) {
+    form.querySelector('button[type="submit"]').textContent = "Send request";
+    form.querySelector("p").textContent = "Fill this in and it opens your email app with everything ready to send.";
+    form.querySelector(".form__note").innerHTML = 'Prefer to talk? Call <a href="tel:07495749650">07495 749 650</a>.';
+  }
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const r = request();
     if (!r) return;
+    if (byEmail) {
+      sendEmail(r);
+      return;
+    }
     const text = `${r.subject}\n\n${r.text}`;
     window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
   });
@@ -49,7 +62,10 @@
   document.getElementById("quote-email")?.addEventListener("click", (e) => {
     e.preventDefault();
     const r = request();
-    if (!r) return;
-    location.href = `mailto:${EMAIL}?subject=${encodeURIComponent(r.subject)}&body=${encodeURIComponent(r.text)}`;
+    if (r) sendEmail(r);
   });
+
+  function sendEmail(r) {
+    location.href = `mailto:${EMAIL}?subject=${encodeURIComponent(r.subject)}&body=${encodeURIComponent(r.text)}`;
+  }
 })();

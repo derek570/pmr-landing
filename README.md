@@ -71,3 +71,8 @@ Every red button opens WhatsApp to 07495 749 650 (`wa.me/447495749650`), with a
 message prefilled for that button. The `.btn--wa` class adds the WhatsApp icon.
 Phone and email appear only on `contact.html`. Every other page links to it
 through an **Other ways to contact us** button.
+
+On a computer (mouse or trackpad as the main pointer), `pcContactRoute()` in
+`js/main.js` sends red buttons to the contact page instead, relabels "WhatsApp
+us" as "Contact us" and hides the grey duplicate. The quote form then sends by
+email. Phones and tablets keep WhatsApp.

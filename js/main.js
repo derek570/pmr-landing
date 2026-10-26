@@ -3,6 +3,7 @@
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   navToggle();
+  pcContactRoute();
 
   if (reduceMotion || typeof gsap === "undefined") {
     document.querySelector(".intro")?.remove();
@@ -268,6 +269,30 @@ function navToggle() {
   btn.addEventListener("click", () => set(!nav.classList.contains("nav--open")));
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") set(false); });
   nav.querySelectorAll(".nav__links a").forEach((a) => a.addEventListener("click", () => set(false)));
+}
+
+/* Red buttons open WhatsApp on phones and tablets. On a computer, where
+   WhatsApp may not be set up, they go to the contact page instead, and the
+   grey "Other ways to contact us" button beside them is hidden as a duplicate.
+   A data-service attribute carries through as ?service= so the quote form
+   preselects it. */
+function pcContactRoute() {
+  if (!isComputer()) return;
+  const onContact = !!document.getElementById("quote-form");
+  document.querySelectorAll("a.btn--wa").forEach((a) => {
+    const svc = a.dataset.service;
+    a.href = onContact ? "#quote-form" : "contact.html" + (svc ? "?service=" + encodeURIComponent(svc) : "");
+    a.removeAttribute("target");
+    a.removeAttribute("rel");
+    a.classList.remove("btn--wa");
+    if (a.textContent.trim() === "WhatsApp us") a.textContent = "Contact us";
+  });
+  document.querySelectorAll("[data-wa-alt]").forEach((a) => a.remove());
+}
+
+/* A mouse or trackpad as the main pointer means a computer. */
+function isComputer() {
+  return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 }
 
 function setFinalCount(el) {
