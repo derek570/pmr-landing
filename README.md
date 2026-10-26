@@ -9,7 +9,7 @@ build step: edit the HTML, CSS, and JavaScript directly.
 | Services | `services.html` |
 | About us | `about.html` |
 | Gallery | `gallery.html` (photos come from `assets/gallery/gallery.json`) |
-| Contact | `contact.html` (the quote form opens the visitor's email app) |
+| Contact | `contact.html` (phone, email and social links; the quote form opens WhatsApp, with an email fallback) |
 
 The header and footer are repeated in every page. When you change one, change all five.
 
@@ -64,3 +64,10 @@ To add a commentable section, give the element `data-review="unique-key"` and
 - Remove `noindex` from every page and update `robots.txt`.
 - Remove `<script src="js/review.js">` from every page, or leave it in. Without a key
   it does nothing.
+
+## Contact routes
+
+Every red button opens WhatsApp to 07495 749 650 (`wa.me/447495749650`), with a
+message prefilled for that button. The `.btn--wa` class adds the WhatsApp icon.
+Phone and email appear only on `contact.html`. Every other page links to it
+through an **Other ways to contact us** button.
