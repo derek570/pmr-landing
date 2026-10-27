@@ -1,21 +1,34 @@
 /* PMR Bike Couriers — review mode
  *
- * Lets John (or anyone with the review link) click any section of the site to
- * leave a comment or suggest new content. Open the site once with
+ * Lets John (or anyone with the review link) double-tap any part of the site
+ * to leave a comment or suggest new content about it. The comment records
+ * the section and the text or photo that was tapped. Each section also has
+ * a Comment button. Open the site once with
  * ?review=<key> and review mode stays on in that browser until "Exit review".
  * Comments are stored by the pmr-site-review Worker (see review-worker/).
- * Without a key this script does nothing.
+ *
+ * While the site is a private draft that only John has the link to,
+ * DRAFT_OPEN turns review mode on for every visitor and the Worker's
+ * OPEN_REVIEW variable accepts comments without the key. Set both to false
+ * before launch; then only ?review=<key> turns it on.
  */
 (function () {
   const API = "https://pmr-site-review.derek-e10.workers.dev";
   const KEY_STORE = "pmrReviewKey";
   const NAME_STORE = "pmrReviewName";
+  const OFF_STORE = "pmrReviewOff"; // set by "Exit review" so it stays off in this browser
+  const DRAFT_OPEN = true;
 
   const params = new URLSearchParams(location.search);
   const fromUrl = params.get("review");
-  if (fromUrl === "off") store(KEY_STORE, null);
-  else if (fromUrl) store(KEY_STORE, fromUrl);
-  const key = read(KEY_STORE);
+  if (fromUrl === "off") {
+    store(KEY_STORE, null);
+    store(OFF_STORE, "1");
+  } else if (fromUrl) {
+    store(KEY_STORE, fromUrl);
+    store(OFF_STORE, null);
+  }
+  const key = read(KEY_STORE) || (DRAFT_OPEN && !read(OFF_STORE) ? "draft" : null);
   if (!key) return;
 
   if (fromUrl) {
@@ -28,6 +41,8 @@
   const page = location.pathname.split("/").pop() || "index.html";
   let comments = [];
   let active = null; // section key the drawer is showing, or "__all"
+  let target = null; // what was double-tapped, for example "Photo: Bike on track"
+  const pseudoLabels = {}; // labels for parts of the page outside any [data-review] section
 
   injectStyles();
   const ui = buildUi();
@@ -41,6 +56,32 @@
       paintCounts();
     });
   }).observe(document.body, { childList: true, subtree: true });
+
+  // Double-tap (or double-click) anywhere to comment on that spot. Handled in
+  // the capture phase so the second tap can be stopped before it closes a
+  // lightbox or follows a link. Keyboard clicks (detail 0) are ignored.
+  let lastTap = null;
+  document.addEventListener("click", (e) => {
+    if (!e.detail || e.target.closest(".rv-drawer, .rv-bar, .rv-pin")) {
+      lastTap = null;
+      return;
+    }
+    const now = performance.now();
+    if (lastTap && now - lastTap.t < 400 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 40) {
+      e.preventDefault();
+      e.stopPropagation();
+      const first = lastTap.el;
+      lastTap = null;
+      window.getSelection()?.removeAllRanges();
+      // a first tap on a gallery photo opens the lightbox; close it again
+      const box = document.querySelector(".lightbox.is-open");
+      if (box && !first.closest(".lightbox")) box.querySelector(".lightbox__close")?.click();
+      lastTap = null; // the programmatic close click above registered as a tap
+      commentOn(first);
+      return;
+    }
+    lastTap = { t: now, x: e.clientX, y: e.clientY, el: e.target };
+  }, true);
 
   load().then(() => {
     const m = location.hash.match(/^#review-(.+)$/);
@@ -92,12 +133,56 @@
       openDrawer(el.dataset.review);
     });
     el.appendChild(pin);
-    // clicking anywhere on a section that isn't a link or control also opens it
-    el.addEventListener("click", (e) => {
-      if (e.target.closest("a, button, input, select, textarea, label, video, .rv-drawer")) return;
-      if (e.target.closest("[data-review]") !== el) return;
-      openDrawer(el.dataset.review);
-    });
+  }
+
+  /* ---------------- double-tap targets ---------------- */
+  function commentOn(el) {
+    const host = el.closest("[data-review]");
+    let section;
+    if (host) section = host.dataset.review;
+    else {
+      const p = pseudoSection(el);
+      pseudoLabels[p.key] = p.label;
+      section = p.key;
+    }
+    openDrawer(section);
+    setTarget(describe(el));
+    flash(el.closest("h1, h2, h3, h4, p, li, blockquote, figure, img, .btn, .stat, .card, .reel-row__item") || el);
+  }
+
+  // Parts of the page that aren't inside a review section.
+  function pseudoSection(el) {
+    if (el.closest(".lightbox")) return { key: "gallery-photo", label: "Gallery: photo viewer" };
+    if (el.closest("footer")) return { key: "site-footer", label: "Footer" };
+    if (el.closest("header, .nav")) return { key: "site-menu", label: "Menu bar" };
+    return { key: "page-other", label: document.title.split(" — ")[0] + ": other" };
+  }
+
+  // A short, human description of what was tapped.
+  function describe(el) {
+    const img = el.closest("img") || el.closest(".reel-row__item, figure, .card__media, .svc__media")?.querySelector("img");
+    if (img) return "Photo: " + (img.alt || decodeURIComponent(img.src.split("/").pop()));
+    if (el.closest("video")) return "Video";
+    const block = el.closest("h1, h2, h3, h4, p, li, blockquote, figcaption, label, a, button, .stat") || el;
+    const text = block.textContent.replace(/\s+/g, " ").trim();
+    return text.length > 140 ? text.slice(0, 137) + "…" : text;
+  }
+
+  function flash(el) {
+    el.classList.add("rv-flash");
+    setTimeout(() => el.classList.remove("rv-flash"), 1600);
+  }
+
+  function setTarget(text) {
+    target = text || null;
+    ui.target.hidden = !target;
+    ui.target.querySelector("q").textContent = target || "";
+  }
+
+  function sectionLabel(key) {
+    const el = document.querySelector(`[data-review="${CSS.escape(key)}"]`);
+    if (el) return labelOf(el);
+    return pseudoLabels[key] || comments.find((c) => c.section === key)?.sectionLabel || key;
   }
 
   function labelOf(el) {
@@ -124,12 +209,14 @@
     document.querySelector(`[data-review="${CSS.escape(section)}"]`)?.classList.add("rv-active");
     ui.drawer.classList.add("is-open");
     ui.drawer.setAttribute("aria-hidden", "false");
+    setTarget(null);
     renderDrawer();
     ui.drawer.querySelector(".rv-drawer__close").focus();
   }
 
   function closeDrawer() {
     active = null;
+    setTarget(null);
     ui.drawer.classList.remove("is-open");
     ui.drawer.setAttribute("aria-hidden", "true");
     document.querySelectorAll(".rv-section.rv-active").forEach((s) => s.classList.remove("rv-active"));
@@ -137,8 +224,7 @@
 
   function renderDrawer() {
     const all = active === "__all";
-    const el = all ? null : document.querySelector(`[data-review="${CSS.escape(active)}"]`);
-    ui.title.textContent = all ? "All comments" : el ? labelOf(el) : active;
+    ui.title.textContent = all ? "All comments" : sectionLabel(active);
     const list = all
       ? comments.slice().sort((a, b) => (a.status === b.status ? 0 : a.status === "open" ? -1 : 1))
       : comments.filter((c) => c.section === active && c.page === page);
@@ -160,6 +246,7 @@
     item.innerHTML = `
       ${where}
       <header><strong>${esc(c.author)}</strong><span class="rv-tag rv-tag--${c.kind}">${c.kind === "content" ? "New content" : "Comment"}</span><time>${when}</time></header>
+      ${c.target ? `<blockquote class="rv-item__target">${esc(c.target)}</blockquote>` : ""}
       <p>${esc(c.body).replace(/\n/g, "<br>")}</p>
       <div class="rv-item__actions">
         <button type="button" data-act="status">${c.status === "open" ? "✓ Mark done" : "↺ Reopen"}</button>
@@ -205,7 +292,6 @@
     if (!author) return f.author.focus();
     if (!body) return f.body.focus();
     store(NAME_STORE, author);
-    const el = document.querySelector(`[data-review="${CSS.escape(active)}"]`);
     f.send.disabled = true;
     try {
       const { comment } = await api("/comments", {
@@ -213,7 +299,8 @@
         body: JSON.stringify({
           page,
           section: active,
-          sectionLabel: el ? labelOf(el) : active,
+          sectionLabel: sectionLabel(active),
+          target,
           kind: f.kind.value,
           author,
           body,
@@ -221,6 +308,7 @@
       });
       comments.push(comment);
       f.body.value = "";
+      setTarget(null);
       ui.formNote.textContent = "Saved. Derek will see it.";
       paintCounts();
       renderDrawer();
@@ -239,7 +327,7 @@
     bar.setAttribute("aria-label", "Review mode");
     bar.innerHTML = `
       <span class="rv-bar__dot" aria-hidden="true"></span>
-      <span class="rv-bar__text"><strong>Review mode</strong> · tap any section to comment</span>
+      <span class="rv-bar__text"><strong>Review mode</strong> · double-tap anything to comment</span>
       <button type="button" class="rv-bar__all"></button>
       <button type="button" class="rv-bar__exit">Exit review</button>
       <span class="rv-bar__status" role="status"></span>`;
@@ -261,6 +349,7 @@
           <label><input type="radio" name="kind" value="comment" checked> Comment or change</label>
           <label><input type="radio" name="kind" value="content"> Add new content</label>
         </fieldset>
+        <p class="rv-form__target" hidden>About: <q></q> <button type="button" aria-label="Comment on the whole section instead">✕</button></p>
         <label for="rv-body">Your note</label>
         <textarea id="rv-body" name="body" rows="5" placeholder="For example: change the price, add a line about Brands Hatch, swap this photo…"></textarea>
         <label for="rv-author">Your name</label>
@@ -273,11 +362,13 @@
     const form = drawer.querySelector(".rv-form");
     form.elements.author.value = read(NAME_STORE) || "";
     form.addEventListener("submit", submit);
+    form.querySelector(".rv-form__target button").addEventListener("click", () => setTarget(null));
     drawer.querySelector(".rv-drawer__close").addEventListener("click", closeDrawer);
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && active) closeDrawer(); });
     bar.querySelector(".rv-bar__all").addEventListener("click", () => openDrawer("__all"));
     bar.querySelector(".rv-bar__exit").addEventListener("click", () => {
       store(KEY_STORE, null);
+      store(OFF_STORE, "1");
       location.reload();
     });
     // pick up comments John adds from another device while the page is open
@@ -288,6 +379,7 @@
       drawer,
       form,
       title: drawer.querySelector("#rv-title"),
+      target: form.querySelector(".rv-form__target"),
       list: drawer.querySelector(".rv-list"),
       formNote: drawer.querySelector(".rv-form__note"),
       allBtn: bar.querySelector(".rv-bar__all"),
@@ -297,7 +389,14 @@
 
   function injectStyles() {
     const css = `
-      .rv-section { outline: 2px dashed transparent; outline-offset: -6px; transition: outline-color .2s; cursor: copy; }
+      html { touch-action: manipulation; } /* stops double-tap zoom so double-tap can open comments */
+      .rv-section { outline: 2px dashed transparent; outline-offset: -6px; transition: outline-color .2s; }
+      .rv-flash { outline: 3px solid #ffc400 !important; outline-offset: 4px; border-radius: 4px; }
+      .rv-form__target { font-size: 14px; color: var(--muted); display: flex; gap: 8px; align-items: flex-start; }
+      .rv-form__target[hidden] { display: none; }
+      .rv-form__target q { flex: 1; color: var(--white); font-style: italic; }
+      .rv-form__target button { flex: 0 0 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,.18); background: transparent; color: #fff; cursor: pointer; }
+      .rv-item__target { margin: 0 0 8px; padding: 6px 10px; border-left: 3px solid #ffc400; background: rgba(255,196,0,.08); font-size: 14px; font-style: italic; color: var(--muted); }
       .rv-section:hover, .rv-section.rv-active { outline-color: rgba(225,6,0,.7); }
       .rv-section.rv-has-open { outline-color: rgba(255,196,0,.55); }
       .rv-pin { position: absolute; top: 12px; right: 12px; z-index: 40; display: inline-flex; align-items: center; gap: 6px;

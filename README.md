@@ -33,11 +33,17 @@ only source of truth. Photos still in `assets/img/` aren't touched.
 
 ## Review mode
 
-Review mode lets John comment on any section of any page. Open the site with
-`?review=<key>` and the browser remembers the key until he selects **Exit review**.
-Each section marked `data-review="..."` gets a **Comment** button, and clicking empty
-space in a section opens it too. Comments are either a comment or change, or new
-content to add. Anyone in review mode can mark one done or delete it.
+Review mode lets John comment on any part of any page. He double-taps (or
+double-clicks) the text or photo he means. The comment then records the section and
+what he tapped. Each section marked `data-review="..."` also gets a **Comment**
+button. Comments are either a comment or change, or new content to add. Anyone in
+review mode can mark one done or delete it.
+
+While the site is a private draft that only John has the link to, review mode is
+on for every visitor. `DRAFT_OPEN` in `js/review.js` turns it on, and the Worker
+variable `OPEN_REVIEW` accepts comments without the key. **Exit review** turns it
+off in that browser, and `?review=<key>` turns it back on. With both settings off,
+only `?review=<key>` turns review mode on.
 
 Comments are stored by the `pmr-site-review` Cloudflare Worker in the D1 database
 `pmr-site-review`. The source is in `review-worker/`.
@@ -55,6 +61,8 @@ Comments are stored by the `pmr-site-review` Cloudflare Worker in the D1 databas
   ```
 
 - To deploy Worker changes, run `npx wrangler deploy` in `review-worker/`.
+- Schema changes live in `review-worker/migrations/`. Apply one with
+  `npx wrangler d1 execute pmr-site-review --remote --file migrations/<file>`.
 
 To add a commentable section, give the element `data-review="unique-key"` and
 `data-review-label="Page: what it is"`.
@@ -62,8 +70,10 @@ To add a commentable section, give the element `data-review="unique-key"` and
 ## Before launch
 
 - Remove `noindex` from every page and update `robots.txt`.
-- Remove `<script src="js/review.js">` from every page, or leave it in. Without a key
-  it does nothing.
+- Set `DRAFT_OPEN` to `false` in `js/review.js`, and set `OPEN_REVIEW` to `"false"`
+  in `review-worker/wrangler.jsonc`, then redeploy the Worker. Otherwise every
+  visitor sees review mode and can post comments.
+- Alternatively, remove `<script src="js/review.js">` from every page.
 
 ## Contact routes
 

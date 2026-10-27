@@ -3,9 +3,11 @@
  * Stores comments that John (and Derek) leave on sections of the website while
  * in review mode. Every request must carry the shared review key in the
  * X-Review-Key header; the key is a Worker secret (REVIEW_KEY), never in source.
+ * While OPEN_REVIEW is "true", the key check is skipped and the origin check
+ * is the only gate. Turn it off before the site launches.
  *
  *   GET    /comments              all comments, oldest first
- *   POST   /comments              { page, section, sectionLabel, kind, author, body }
+ *   POST   /comments              { page, section, sectionLabel, target?, kind, author, body }
  *   PATCH  /comments/:id          { status: "open" | "resolved" }
  *   DELETE /comments/:id
  */
@@ -20,7 +22,9 @@ export default {
 
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
     if (!cors["Access-Control-Allow-Origin"] && origin) return json({ error: "origin not allowed" }, 403, cors);
-    if (!env.REVIEW_KEY || !safeEqual(request.headers.get("X-Review-Key") || "", env.REVIEW_KEY)) {
+    // OPEN_REVIEW="true" accepts any key while the site is a private draft (see js/review.js).
+    const open = env.OPEN_REVIEW === "true";
+    if (!open && (!env.REVIEW_KEY || !safeEqual(request.headers.get("X-Review-Key") || "", env.REVIEW_KEY))) {
       return json({ error: "review key required" }, 401, cors);
     }
 
@@ -42,6 +46,7 @@ export default {
           page: short(input.page),
           section: short(input.section),
           section_label: short(input.sectionLabel || input.section),
+          target: short(input.target) || null,
           kind: input.kind === "content" ? "content" : "comment",
           author: short(input.author) || "Anonymous",
           body: String(input.body || "").trim().slice(0, MAX_BODY),
@@ -49,9 +54,9 @@ export default {
         };
         if (!row.page || !row.section || !row.body) return json({ error: "page, section and body are required" }, 400, cors);
         await env.DB.prepare(
-          `INSERT INTO comments (id, page, section, section_label, kind, author, body, status, created_at, updated_at)
-           VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 'open', ?8, ?8)`
-        ).bind(row.id, row.page, row.section, row.section_label, row.kind, row.author, row.body, row.created_at).run();
+          `INSERT INTO comments (id, page, section, section_label, target, kind, author, body, status, created_at, updated_at)
+           VALUES (?1, ?2, ?3, ?4, ?9, ?5, ?6, ?7, 'open', ?8, ?8)`
+        ).bind(row.id, row.page, row.section, row.section_label, row.kind, row.author, row.body, row.created_at, row.target).run();
         const saved = await env.DB.prepare("SELECT * FROM comments WHERE id = ?1").bind(row.id).first();
         return json({ comment: toApi(saved) }, 201, cors);
       }
@@ -87,6 +92,7 @@ function toApi(r) {
     page: r.page,
     section: r.section,
     sectionLabel: r.section_label,
+    target: r.target || null,
     kind: r.kind,
     author: r.author,
     body: r.body,

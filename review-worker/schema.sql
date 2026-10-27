@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS comments (
   page          TEXT NOT NULL,           -- e.g. "services.html"
   section       TEXT NOT NULL,           -- data-review key, e.g. "services-storage"
   section_label TEXT NOT NULL,
+  target        TEXT,                    -- what was double-tapped, e.g. "Photo: Bike on track"
   kind          TEXT NOT NULL CHECK (kind IN ('comment', 'content')),
   author        TEXT NOT NULL,
   body          TEXT NOT NULL,

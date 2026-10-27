@@ -4,7 +4,10 @@
   "main": "src/index.js",
   "compatibility_date": "2026-10-01",
   "vars": {
-    "ALLOWED_ORIGINS": "https://derek570.github.io,https://pmrbikecouriers.co.uk,https://www.pmrbikecouriers.co.uk"
+    "ALLOWED_ORIGINS": "https://derek570.github.io,https://pmrbikecouriers.co.uk,https://www.pmrbikecouriers.co.uk",
+    // "true" while the site is a private draft for John: comments need no key.
+    // Set to "false" before launch.
+    "OPEN_REVIEW": "true"
   },
   "d1_databases": [
     {
