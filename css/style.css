@@ -786,6 +786,8 @@ a { color: inherit; }
 }
 .option strong { display: block; font-family: var(--display); font-weight: 400; font-size: 22px; letter-spacing: 0.02em; text-transform: uppercase; }
 .option span { color: var(--muted); font-size: 14px; }
+.options--4 { grid-template-columns: repeat(2, 1fr); }
+.option__fee { display: block; margin-top: 10px; font-style: normal; font-weight: 600; font-size: 15px; color: var(--red); }
 .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
 .duo .option strong { color: var(--red); }
 
@@ -979,7 +981,7 @@ a { color: inherit; }
   .creds { grid-template-columns: 1fr; }
   .promise { padding: 90px 20px; }
   .svc__media img { height: 280px; }
-  .options { grid-template-columns: 1fr; }
+  .options, .options--4 { grid-template-columns: 1fr; }
   .duo { grid-template-columns: 1fr; }
   .field-row { grid-template-columns: 1fr; }
   .form { padding: 24px 20px; }
