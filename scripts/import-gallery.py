@@ -141,12 +141,12 @@ def main():
             # shrink large photos only; sips -Z would also enlarge small ones
             resize = ["-Z", MAX_EDGE] if long_edge(src) > int(MAX_EDGE) else []
             subprocess.run(
-                ["sips", "-s", "format", "jpeg", "-s", "formatOptions", "80", *resize,
+                ["sips", "-s", "format", "jpeg", "-s", "formatOptions", "60", *resize,
                  str(src), "--out", str(dest)],
                 check=True, stdout=subprocess.DEVNULL)
             thumb = dest_dir / "thumbs" / dest.name
             subprocess.run(
-                ["sips", "-s", "format", "jpeg", "-s", "formatOptions", "72", "-Z", THUMB_EDGE,
+                ["sips", "-s", "format", "jpeg", "-s", "formatOptions", "50", "-Z", THUMB_EDGE,
                  str(dest), "--out", str(thumb)],
                 check=True, stdout=subprocess.DEVNULL)
             entry = {

@@ -17,7 +17,14 @@
   gsap.config({ nullTargetWarn: false });
 
   /* ---------- intro wipe (home page only): bike races across, panels peel away ---------- */
-  const hasIntro = !!document.querySelector(".intro");
+  // Only on the first Home visit in a browsing session: replaying it on every
+  // return to Home made moving between pages feel slow on a phone.
+  const introSeen = document.documentElement.classList.contains("intro-seen");
+  if (introSeen) document.querySelector(".intro")?.remove();
+  const hasIntro = !introSeen && !!document.querySelector(".intro");
+  if (hasIntro) {
+    try { sessionStorage.setItem("pmrIntroSeen", "1"); } catch (e) { /* private mode: replay is harmless */ }
+  }
   const intro = gsap.timeline({
     onComplete: () => document.querySelector(".intro")?.remove(),
   });
@@ -45,7 +52,7 @@
     duration: 0.8,
     stagger: 0.12,
     ease: "power2.out",
-    delay: hasIntro ? 1.5 : 0.5,
+    delay: hasIntro ? 1.5 : 0.3,
   });
   gsap.from(".hero__stats .stat", {
     opacity: 0,
@@ -53,7 +60,7 @@
     duration: 0.7,
     stagger: 0.1,
     ease: "power2.out",
-    delay: hasIntro ? 1.8 : 0.8,
+    delay: hasIntro ? 1.8 : 0.45,
   });
 
   /* subtle hero video parallax on scroll */
@@ -72,7 +79,7 @@
     gsap.to(obj, {
       v: target,
       duration: 1.6,
-      delay: hasIntro ? 1.9 : 0.9,
+      delay: hasIntro ? 1.9 : 0.5,
       ease: "power2.out",
       onUpdate: () => (el.textContent = prefix + Math.round(obj.v) + suffix),
     });

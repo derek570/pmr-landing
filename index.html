@@ -15,6 +15,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<!-- The intro wipe plays once per visit; hide it before first paint on return trips to Home -->
+<script>try{if(sessionStorage.getItem("pmrIntroSeen"))document.documentElement.classList.add("intro-seen")}catch(e){}</script>
 </head>
 <body>
 
@@ -225,15 +227,15 @@
     <h2 class="h-display reveal-lines"><span>SEE US IN</span> <span class="txt-red">ACTION.</span></h2>
     <div class="reels__grid">
       <figure class="reel">
-        <video muted loop playsinline preload="metadata" src="assets/video/process.mp4"></video>
+        <video muted loop playsinline preload="none" poster="assets/video/process-poster.jpg" src="assets/video/process.mp4"></video>
         <figcaption>The PMR process — collection to delivery</figcaption>
       </figure>
       <figure class="reel">
-        <video muted loop playsinline preload="metadata" src="assets/video/garage.mp4"></video>
+        <video muted loop playsinline preload="none" poster="assets/video/garage-poster.jpg" src="assets/video/garage.mp4"></video>
         <figcaption>Inside the PMR garage</figcaption>
       </figure>
       <figure class="reel">
-        <video muted loop playsinline preload="metadata" src="assets/video/track.mp4"></video>
+        <video muted loop playsinline preload="none" poster="assets/video/track-poster.jpg" src="assets/video/track.mp4"></video>
         <figcaption>Delivered. Ridden. Loved.</figcaption>
       </figure>
     </div>
