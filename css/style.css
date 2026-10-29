@@ -1039,6 +1039,33 @@ a.reel-row__item { display: block; cursor: pointer; }
 .album-grid__item img { display: block; width: 100%; height: auto; transition: transform 0.4s ease; }
 .album-grid__item:hover img { transform: scale(1.04); }
 .album-grid__item:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+/* video clips: a play badge on the thumbnail, and the player in the lightbox */
+.album-grid__item { position: relative; }
+.play-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 64px;
+  height: 64px;
+  margin: -32px 0 0 -32px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.55);
+  border: 2px solid var(--white);
+  pointer-events: none;
+}
+.play-badge::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -12px 0 0 -7px;
+  border-style: solid;
+  border-width: 12px 0 12px 20px;
+  border-color: transparent transparent transparent var(--white);
+}
+.reel-row__item:hover .play-badge, .album-grid__item:hover .play-badge { background: var(--red); border-color: var(--red); }
+.lightbox video { max-width: 100%; max-height: 100%; border-radius: 8px; background: #000; }
+.lightbox [hidden] { display: none; }
 .album-more { padding-top: 56px; padding-bottom: 72px; }
 .album-more .reel-group__title { max-width: 1280px; margin: 0 auto 24px; }
 .album-others {

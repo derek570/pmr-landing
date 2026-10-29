@@ -34,6 +34,15 @@ the reels and album grids use. The `READ ME.txt` in that folder explains the lay
 The importer replaces every reel in `assets/gallery/`, so the iCloud folder is the
 only source of truth. Photos still in `assets/img/` aren't touched.
 
+### Videos
+
+A folder can also hold video clips (`.mp4`, `.mov` or `.m4v`). The importer needs
+`ffmpeg` (`brew install ffmpeg`) and turns each clip into a 20-second, 720 px, silent
+MP4 with a poster frame. Clips show a play badge and play in the lightbox. GitHub
+Pages serves them from the repository, so keep them few and short: the six clips in
+`7 On video` come to about 21 MB. Leave out clips that show customers' faces unless
+they've agreed to appear on the site.
+
 ## Review mode
 
 Review mode lets John comment on any part of any page. He double-taps (or

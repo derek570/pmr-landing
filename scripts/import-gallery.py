@@ -21,6 +21,12 @@ Alt text comes from the file name when it is descriptive
 ("silverstone-pitlane.jpg" -> "Silverstone pitlane"); camera names such as
 IMG_0412 fall back to "<group> photo <n>". Rename files in iCloud to improve it.
 
+Videos (.mp4, .mov, .m4v) go in the same folders. Each one is cut to its first
+20 seconds, scaled to 720 px on the short edge, stripped of sound and written
+as an H.264 MP4 with ffmpeg (brew install ffmpeg). A frame from one second in
+becomes its poster and thumbnail. Keep clips short and few: GitHub Pages
+serves them straight from the repository.
+
 Usage:  python3 scripts/import-gallery.py [--source DIR] [--dry-run]
 """
 import argparse
@@ -34,10 +40,14 @@ import sys
 REPO = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT_SOURCE = pathlib.Path.home() / "Library/Mobile Documents/com~apple~CloudDocs/PMR Website Gallery"
 OUT_DIR = REPO / "assets/gallery"
-EXTS = {".jpg", ".jpeg", ".png", ".heic", ".heif", ".webp", ".tif", ".tiff"}
+PHOTO_EXTS = {".jpg", ".jpeg", ".png", ".heic", ".heif", ".webp", ".tif", ".tiff"}
+VIDEO_EXTS = {".mp4", ".mov", ".m4v"}
+EXTS = PHOTO_EXTS | VIDEO_EXTS
 CAMERA_NAME = re.compile(r"^(img|dsc|dscn|pxl|photo|image|screenshot)?[\s_-]*\d+", re.I)
 MAX_EDGE = "1600"
 THUMB_EDGE = "600"
+VIDEO_SECONDS = "20"
+VIDEO_SHORT_EDGE = 720
 
 
 def slugify(text):
@@ -63,6 +73,21 @@ def long_edge(path):
     return max(int(n) for n in re.findall(r"pixel(?:Width|Height): (\d+)", out))
 
 
+def import_video(src, dest, poster):
+    """Write a small, silent web copy of src to dest and a poster frame to poster."""
+    e = VIDEO_SHORT_EDGE
+    scale = f"scale='if(gt(iw,ih),-2,min({e},iw))':'if(gt(iw,ih),min({e},ih),-2)'"
+    subprocess.run(
+        ["ffmpeg", "-v", "error", "-y", "-i", str(src), "-t", VIDEO_SECONDS, "-an",
+         "-vf", f"{scale},fps=30", "-c:v", "libx264", "-crf", "30", "-preset", "slow",
+         "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(dest)],
+        check=True)
+    subprocess.run(
+        ["ffmpeg", "-v", "error", "-y", "-ss", "1", "-i", str(dest), "-frames:v", "1",
+         "-q:v", "3", str(poster)],
+        check=True)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--source", type=pathlib.Path, default=DEFAULT_SOURCE)
@@ -85,7 +110,7 @@ def main():
         caption_file = folder / "caption.txt"
         caption = caption_file.read_text().strip() if caption_file.exists() else ""
         groups.append((folder, title, caption, photos))
-        print(f"group {title}: {len(photos)} photo(s)")
+        print(f"group {title}: {len(photos)} item(s)")
 
     if not groups:
         sys.exit("No photos found; gallery.json left unchanged.")
@@ -107,6 +132,12 @@ def main():
         entries = []
         for n, src in enumerate(photos, 1):
             dest = dest_dir / f"{slug}-{n:02d}.jpg"
+            video = None
+            name = src.stem
+            if src.suffix.lower() in VIDEO_EXTS:
+                video = dest.with_suffix(".mp4")
+                import_video(src, video, dest)
+                src = dest
             # shrink large photos only; sips -Z would also enlarge small ones
             resize = ["-Z", MAX_EDGE] if long_edge(src) > int(MAX_EDGE) else []
             subprocess.run(
@@ -118,11 +149,14 @@ def main():
                 ["sips", "-s", "format", "jpeg", "-s", "formatOptions", "72", "-Z", THUMB_EDGE,
                  str(dest), "--out", str(thumb)],
                 check=True, stdout=subprocess.DEVNULL)
-            entries.append({
+            entry = {
                 "src": dest.relative_to(REPO).as_posix(),
                 "thumb": thumb.relative_to(REPO).as_posix(),
-                "alt": alt_from_name(src.stem, title, n),
-            })
+                "alt": alt_from_name(name, title, n),
+            }
+            if video:
+                entry["video"] = video.relative_to(REPO).as_posix()
+            entries.append(entry)
         manifest["groups"].append({"slug": slug, "title": title, "caption": caption, "photos": entries})
 
     (OUT_DIR / "gallery.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")

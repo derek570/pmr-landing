@@ -10,6 +10,10 @@
      Any photo opens full size in the lightbox, and #photo-<n> in the address
      opens that photo straight away.
 
+   A group can hold short video clips as well as photos (items with a
+   "video" path). They show their poster frame with a play badge and play in
+   the lightbox.
+
    To change the photos, run scripts/import-gallery.py rather than editing the
    JSON by hand. */
 (function () {
@@ -36,7 +40,12 @@
 
   const albumUrl = (g, n) => `gallery-album.html?g=${encodeURIComponent(g.slug)}` + (n ? `#photo-${n}` : "");
   const thumbOf = (p) => p.thumb || p.src;
-  const countText = (g) => `${g.photos.length} photo${g.photos.length === 1 ? "" : "s"}`;
+  const isVideo = (p) => Boolean(p.video);
+  const playBadge = (p) => (isVideo(p) ? '<span class="play-badge" aria-hidden="true"></span>' : "");
+  const countText = (g) => {
+    const word = g.photos.length && g.photos.every(isVideo) ? "video" : "photo";
+    return `${g.photos.length} ${word}${g.photos.length === 1 ? "" : "s"}`;
+  };
 
   // "Wrapped and protected" -> "Wrapped and <em>protected</em>"
   function titleHtml(title) {
@@ -71,7 +80,7 @@
         a.className = "reel-row__item";
         a.href = albumUrl(g, i + 1);
         a.setAttribute("aria-label", `${p.alt || g.title} — open the ${g.title} album`);
-        a.innerHTML = `<img src="${encodeURI(thumbOf(p))}" alt="${esc(p.alt || "")}" loading="lazy">`;
+        a.innerHTML = `<img src="${encodeURI(thumbOf(p))}" alt="${esc(p.alt || "")}" loading="lazy">${playBadge(p)}`;
         track.appendChild(a);
       });
       if (g.photos.length > PREVIEW) {
@@ -161,8 +170,8 @@
       btn.type = "button";
       btn.className = "album-grid__item";
       btn.id = `photo-${i + 1}`;
-      btn.setAttribute("aria-label", "View photo full size: " + (p.alt || g.title));
-      btn.innerHTML = `<img src="${encodeURI(thumbOf(p))}" alt="${esc(p.alt || "")}" loading="lazy">`;
+      btn.setAttribute("aria-label", (isVideo(p) ? "Play video: " : "View photo full size: ") + (p.alt || g.title));
+      btn.innerHTML = `<img src="${encodeURI(thumbOf(p))}" alt="${esc(p.alt || "")}" loading="lazy">${playBadge(p)}`;
       btn.addEventListener("click", () => box.open(i));
       grid.appendChild(btn);
     });
@@ -187,6 +196,16 @@
     const box = document.getElementById("lightbox");
     const boxImg = box.querySelector("img");
     const boxCap = box.querySelector(".lightbox__caption");
+    // One player, shown in place of the image when the current item is a clip.
+    // Clips have no sound, so they autoplay muted and loop like a phone reel.
+    const boxVid = document.createElement("video");
+    boxVid.controls = true;
+    boxVid.muted = true;
+    boxVid.loop = true;
+    boxVid.playsInline = true;
+    boxVid.preload = "metadata";
+    boxVid.hidden = true;
+    boxImg.after(boxVid);
     let current = 0;
     let opener = null;
 
@@ -198,14 +217,28 @@
       box.querySelector(".lightbox__close").focus();
     }
     function close() {
+      boxVid.pause();
       box.classList.remove("is-open");
       document.body.style.overflow = "";
       opener?.focus();
     }
     function show(i) {
       current = (i + items.length) % items.length;
-      boxImg.src = items[current].src;
-      boxImg.alt = items[current].alt;
+      const item = items[current];
+      boxVid.pause();
+      boxImg.hidden = isVideo(item);
+      boxVid.hidden = !isVideo(item);
+      if (isVideo(item)) {
+        boxVid.poster = item.src;
+        boxVid.src = item.video;
+        boxVid.setAttribute("aria-label", item.alt || item.group);
+        boxVid.play().catch(() => {});
+      } else {
+        boxVid.removeAttribute("src");
+        boxVid.load();
+        boxImg.src = item.src;
+        boxImg.alt = item.alt;
+      }
       boxCap.textContent = `${items[current].alt || items[current].group} · ${current + 1} of ${items.length}`;
     }
     box.querySelector(".lightbox__close").addEventListener("click", close);
@@ -220,7 +253,12 @@
     });
     // swipe left or right on a phone to move between photos
     let touchX = null;
-    box.addEventListener("touchstart", (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+    box.addEventListener("touchstart", (e) => {
+      // leave the bottom of a video to its own scrub bar
+      const r = boxVid.getBoundingClientRect();
+      const onScrubBar = e.target === boxVid && e.touches[0].clientY > r.bottom - 64;
+      touchX = onScrubBar ? null : e.touches[0].clientX;
+    }, { passive: true });
     box.addEventListener("touchend", (e) => {
       if (touchX === null) return;
       const dx = e.changedTouches[0].clientX - touchX;

@@ -621,6 +621,49 @@
           "alt": "The PMR van from the back"
         }
       ]
+    },
+    {
+      "slug": "on-video",
+      "title": "On video",
+      "caption": "Short clips from the paddock, the depot and the track",
+      "photos": [
+        {
+          "src": "assets/gallery/on-video/on-video-01.jpg",
+          "thumb": "assets/gallery/on-video/thumbs/on-video-01.jpg",
+          "alt": "Bikes in the paddock",
+          "video": "assets/gallery/on-video/on-video-01.mp4"
+        },
+        {
+          "src": "assets/gallery/on-video/on-video-02.jpg",
+          "thumb": "assets/gallery/on-video/thumbs/on-video-02.jpg",
+          "alt": "Wrapping a bike onto a stillage",
+          "video": "assets/gallery/on-video/on-video-02.mp4"
+        },
+        {
+          "src": "assets/gallery/on-video/on-video-03.jpg",
+          "thumb": "assets/gallery/on-video/thumbs/on-video-03.jpg",
+          "alt": "Stillages ready at the depot",
+          "video": "assets/gallery/on-video/on-video-03.mp4"
+        },
+        {
+          "src": "assets/gallery/on-video/on-video-04.jpg",
+          "thumb": "assets/gallery/on-video/thumbs/on-video-04.jpg",
+          "alt": "Bikes in storage at the depot",
+          "video": "assets/gallery/on-video/on-video-04.mp4"
+        },
+        {
+          "src": "assets/gallery/on-video/on-video-05.jpg",
+          "thumb": "assets/gallery/on-video/thumbs/on-video-05.jpg",
+          "alt": "A bike on track",
+          "video": "assets/gallery/on-video/on-video-05.mp4"
+        },
+        {
+          "src": "assets/gallery/on-video/on-video-06.jpg",
+          "thumb": "assets/gallery/on-video/thumbs/on-video-06.jpg",
+          "alt": "Walking the pit lane",
+          "video": "assets/gallery/on-video/on-video-06.mp4"
+        }
+      ]
     }
   ]
 }
