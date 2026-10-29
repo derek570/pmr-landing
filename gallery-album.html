@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery album — PMR Bike Couriers</title>
+<meta name="description" content="Photos from the track, the paddock and the road with PMR Bike Couriers.">
+<!-- Draft for client review — remove noindex when moving to the live domain -->
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:title" content="Gallery — PMR Bike Couriers">
+<meta property="og:description" content="Photos from the track, the paddock and the road with PMR Bike Couriers.">
+<meta property="og:image" content="assets/img/hero-poster.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0a0a'/%3E%3Ctext x='32' y='44' font-family='Arial Black,sans-serif' font-size='34' font-weight='900' fill='%23e10600' text-anchor='middle'%3EP%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="nav" id="top">
+  <a class="nav__logo" href="index.html"><img src="assets/img/pmr-logo.svg" alt="PMR Bike Couriers" width="120" height="44"></a>
+  <nav class="nav__links" id="site-nav" aria-label="Main navigation">
+    <a href="index.html">Home</a>
+    <a href="services.html">Services</a>
+    <a href="about.html">About us</a>
+    <a href="gallery.html" aria-current="page">Gallery</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+  <a class="btn btn--red btn--wa nav__cta" href="https://wa.me/447495749650?text=Hi%20PMR%2C%20I%27d%20like%20a%20quote%20please." target="_blank" rel="noopener">Get a quote</a>
+  <button class="nav__toggle" type="button" aria-controls="site-nav" aria-expanded="false" aria-label="Open menu"><span></span></button>
+</header>
+
+<main>
+  <section class="page-hero page-hero--album">
+    <img class="page-hero__bg" src="assets/img/CqeS6rdrDdI-1.jpg" alt="" aria-hidden="true">
+    <div class="page-hero__inner">
+      <a class="album-back" href="gallery.html">← All galleries</a>
+      <h1 class="page-hero__title" id="album-title">Gallery</h1>
+      <p class="page-hero__sub" id="album-sub"></p>
+    </div>
+  </section>
+
+  <section class="section album" id="album" aria-live="polite">
+    <noscript><p class="gallery-empty">Turn on JavaScript to view the gallery, or see more on <a href="https://www.instagram.com/pmr_bike_couriers">Instagram</a>.</p></noscript>
+  </section>
+
+  <section class="section band album-more" data-review="album-others" data-review-label="Gallery album: other galleries">
+    <h2 class="reel-group__title">More <em>galleries</em></h2>
+    <nav class="album-others" id="album-others" aria-label="Other galleries"></nav>
+  </section>
+
+  <section class="cta" data-review="gallery-cta" data-review-label="Gallery: Ready to ride">
+    <div class="cta__checker" aria-hidden="true"></div>
+    <h2 class="cta__title reveal-lines"><span>READY TO</span> <span class="txt-red">RIDE?</span></h2>
+    <p class="cta__sub">Get your bike booked in for the next trackday, race weekend or European event.</p>
+    <div class="cta__actions">
+      <a class="btn btn--red btn--wa btn--lg" href="https://wa.me/447495749650?text=Hi%20PMR%2C%20I%27d%20like%20a%20quote%20please." target="_blank" rel="noopener">WhatsApp us</a>
+      <a class="btn btn--ghost btn--lg" href="contact.html" data-wa-alt>Other ways to contact us</a>
+    </div>
+  </section>
+</main>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <button class="lightbox__btn lightbox__close" type="button" aria-label="Close">✕</button>
+  <button class="lightbox__btn lightbox__prev" type="button" aria-label="Previous photo">‹</button>
+  <img alt="">
+  <button class="lightbox__btn lightbox__next" type="button" aria-label="Next photo">›</button>
+  <p class="lightbox__caption"></p>
+</div>
+
+<footer class="footer">
+  <div class="footer__brand">PMR<span class="nav__logo-slash">/</span>BIKE COURIERS</div>
+  <p>Fully insured motorcycle transport · UK &amp; Europe</p>
+  <nav class="footer__links" aria-label="Footer">
+    <a href="services.html">Services</a>
+    <a href="about.html">About us</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+  <div class="footer__links">
+    <a href="https://www.instagram.com/pmr_bike_couriers" target="_blank" rel="noopener">Instagram</a>
+    <a href="https://www.facebook.com/PMR-bike-couriers-253643458849092" target="_blank" rel="noopener">Facebook</a>
+    <a href="https://wa.me/447495749650" target="_blank" rel="noopener">WhatsApp</a>
+  </div>
+  <p class="footer__copy">© 2026 PMR Bike Couriers. All rights reserved.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="js/main.js"></script>
+<script src="js/gallery.js"></script>
+<script src="js/review.js" defer></script>
+</body>
+</html>

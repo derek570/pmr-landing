@@ -9,6 +9,7 @@ build step: edit the HTML, CSS, and JavaScript directly.
 | Services | `services.html` |
 | About us | `about.html` |
 | Gallery | `gallery.html` (photos come from `assets/gallery/gallery.json`) |
+| Gallery album | `gallery-album.html?g=<group-slug>` (every photo in one group, opened from a reel) |
 | Contact | `contact.html` (phone, email and social links; the quote form opens WhatsApp, with an email fallback) |
 
 The header and footer are repeated in every page. When you change one, change all five.
@@ -16,7 +17,9 @@ The header and footer are repeated in every page. When you change one, change al
 ## Update the gallery
 
 Each folder in `iCloud Drive/PMR Website Gallery/` becomes one scrolling reel on the
-gallery page. The `READ ME.txt` in that folder explains the layout for John.
+gallery page and one album page. The reel previews the first 12 photos; tapping it
+opens the album with every photo. The importer also writes 600 px thumbnails, which
+the reels and album grids use. The `READ ME.txt` in that folder explains the layout for John.
 
 1. Put the photos into the iCloud folders.
 2. Run the importer, which resizes the photos and rewrites `gallery.json`:

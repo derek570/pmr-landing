@@ -12,8 +12,10 @@ Source layout (one folder per reel on the gallery page):
         ...
 
 Each photo is converted to JPEG, resized to at most 1600 px on the long edge
-with macOS `sips`, and written to assets/gallery/<group>/. The script then
-rewrites assets/gallery/gallery.json, replacing whatever was there.
+with macOS `sips`, and written to assets/gallery/<group>/. A 600 px thumbnail
+goes to assets/gallery/<group>/thumbs/ for the reels and album grids; the
+full-size copy is only loaded in the lightbox. The script then rewrites
+assets/gallery/gallery.json, replacing whatever was there.
 
 Alt text comes from the file name when it is descriptive
 ("silverstone-pitlane.jpg" -> "Silverstone pitlane"); camera names such as
@@ -35,6 +37,7 @@ OUT_DIR = REPO / "assets/gallery"
 EXTS = {".jpg", ".jpeg", ".png", ".heic", ".heif", ".webp", ".tif", ".tiff"}
 CAMERA_NAME = re.compile(r"^(img|dsc|dscn|pxl|photo|image|screenshot)?[\s_-]*\d+", re.I)
 MAX_EDGE = "1600"
+THUMB_EDGE = "600"
 
 
 def slugify(text):
@@ -100,6 +103,7 @@ def main():
         slug = slugify(title)
         dest_dir = OUT_DIR / slug
         dest_dir.mkdir()
+        (dest_dir / "thumbs").mkdir()
         entries = []
         for n, src in enumerate(photos, 1):
             dest = dest_dir / f"{slug}-{n:02d}.jpg"
@@ -109,8 +113,17 @@ def main():
                 ["sips", "-s", "format", "jpeg", "-s", "formatOptions", "80", *resize,
                  str(src), "--out", str(dest)],
                 check=True, stdout=subprocess.DEVNULL)
-            entries.append({"src": dest.relative_to(REPO).as_posix(), "alt": alt_from_name(src.stem, title, n)})
-        manifest["groups"].append({"title": title, "caption": caption, "photos": entries})
+            thumb = dest_dir / "thumbs" / dest.name
+            subprocess.run(
+                ["sips", "-s", "format", "jpeg", "-s", "formatOptions", "72", "-Z", THUMB_EDGE,
+                 str(dest), "--out", str(thumb)],
+                check=True, stdout=subprocess.DEVNULL)
+            entries.append({
+                "src": dest.relative_to(REPO).as_posix(),
+                "thumb": thumb.relative_to(REPO).as_posix(),
+                "alt": alt_from_name(src.stem, title, n),
+            })
+        manifest["groups"].append({"slug": slug, "title": title, "caption": caption, "photos": entries})
 
     (OUT_DIR / "gallery.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
     total = sum(len(g["photos"]) for g in manifest["groups"])

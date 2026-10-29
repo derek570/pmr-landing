@@ -1,35 +1,64 @@
-/* PMR Bike Couriers — gallery page
-   Builds one reel per group from assets/gallery/gallery.json. Each reel slides
-   sideways as the visitor scrolls down, alternating direction. Visitors can
-   also swipe a reel or use its arrow buttons, and the scroll movement carries
-   on from wherever they left it. Any photo opens full size in the lightbox. To change the photos, run
-   scripts/import-gallery.py rather than editing the JSON by hand. */
+/* PMR Bike Couriers — gallery
+   Runs on two pages, both driven by assets/gallery/gallery.json:
+
+   - gallery.html shows one reel per group. Each reel previews the first
+     photos and slides sideways as the visitor scrolls, alternating direction.
+     Visitors can also swipe it or use its arrow buttons, and the scroll
+     movement carries on from wherever they left it. Tapping a group, or any
+     photo in it, opens that group's album page.
+   - gallery-album.html?g=<slug> shows every photo in one group as a grid.
+     Any photo opens full size in the lightbox, and #photo-<n> in the address
+     opens that photo straight away.
+
+   To change the photos, run scripts/import-gallery.py rather than editing the
+   JSON by hand. */
 (function () {
-  const host = document.getElementById("gallery-groups");
-  if (!host) return;
+  const reelsHost = document.getElementById("gallery-groups");
+  const albumHost = document.getElementById("album");
+  if (!reelsHost && !albumHost) return;
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const all = []; // flat list for lightbox next/previous
+  const PREVIEW = 12; // photos shown in each reel before the "view all" tile
 
   fetch("assets/gallery/gallery.json", { cache: "no-cache" })
     .then((r) => r.json())
-    .then((data) => render(data.groups || []))
+    .then((data) => {
+      const groups = data.groups || [];
+      if (reelsHost) renderReels(groups);
+      else renderAlbum(groups);
+      if (typeof ScrollTrigger !== "undefined") {
+        window.addEventListener("load", () => ScrollTrigger.refresh());
+        document.querySelectorAll("main img").forEach((img) => img.addEventListener("load", () => ScrollTrigger.refresh(), { once: true }));
+      }
+    })
     .catch(() => {
-      host.innerHTML = '<p class="gallery-empty">The gallery couldn’t load. See our latest photos on <a href="https://www.instagram.com/pmr_bike_couriers">Instagram</a>.</p>';
+      (reelsHost || albumHost).innerHTML = '<p class="gallery-empty">The gallery couldn’t load. See our latest photos on <a href="https://www.instagram.com/pmr_bike_couriers">Instagram</a>.</p>';
     });
 
-  function render(groups) {
+  const albumUrl = (g, n) => `gallery-album.html?g=${encodeURIComponent(g.slug)}` + (n ? `#photo-${n}` : "");
+  const thumbOf = (p) => p.thumb || p.src;
+  const countText = (g) => `${g.photos.length} photo${g.photos.length === 1 ? "" : "s"}`;
+
+  // "Wrapped and protected" -> "Wrapped and <em>protected</em>"
+  function titleHtml(title) {
+    const words = title.split(" ");
+    const last = words.pop();
+    return `${esc(words.join(" "))} <em>${esc(last)}</em>`;
+  }
+
+  /* ---------- gallery.html: one reel per group ---------- */
+  function renderReels(groups) {
     groups.forEach((g, gi) => {
-      const slug = g.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-      const words = g.title.split(" ");
-      const last = words.pop();
       const section = document.createElement("section");
       section.className = "reel-group" + (gi % 2 ? " band" : "");
-      section.dataset.review = "gallery-" + slug;
+      section.dataset.review = "gallery-" + g.slug;
       section.dataset.reviewLabel = "Gallery: " + g.title;
       section.innerHTML = `
         <div class="reel-group__head">
-          <h2 class="reel-group__title">${esc(words.join(" "))} <em>${esc(last)}</em></h2>
-          ${g.caption ? `<p class="reel-group__meta">${esc(g.caption)}</p>` : ""}
+          <div>
+            <h2 class="reel-group__title"><a href="${albumUrl(g)}">${titleHtml(g.title)}</a></h2>
+            ${g.caption ? `<p class="reel-group__meta">${esc(g.caption)}</p>` : ""}
+          </div>
+          <a class="more reel-group__all" href="${albumUrl(g)}">View all ${countText(g)} →</a>
         </div>
         <div class="reel-row${gi % 3 === 1 ? " reel-row--tall" : ""}">
           <div class="reel-row__scroller"><div class="reel-row__track"></div></div>
@@ -37,23 +66,24 @@
           <button type="button" class="reel-row__arrow reel-row__arrow--next" aria-label="Next photos">›</button>
         </div>`;
       const track = section.querySelector(".reel-row__track");
-      g.photos.forEach((p) => {
-        const idx = all.push({ src: p.src, alt: p.alt || "", group: g.title }) - 1;
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "reel-row__item";
-        btn.setAttribute("aria-label", "View photo: " + (p.alt || g.title));
-        btn.innerHTML = `<img src="${encodeURI(p.src)}" alt="${esc(p.alt || "")}" loading="lazy">`;
-        btn.addEventListener("click", () => openBox(idx));
-        track.appendChild(btn);
+      g.photos.slice(0, PREVIEW).forEach((p, i) => {
+        const a = document.createElement("a");
+        a.className = "reel-row__item";
+        a.href = albumUrl(g, i + 1);
+        a.setAttribute("aria-label", `${p.alt || g.title} — open the ${g.title} album`);
+        a.innerHTML = `<img src="${encodeURI(thumbOf(p))}" alt="${esc(p.alt || "")}" loading="lazy">`;
+        track.appendChild(a);
       });
-      host.appendChild(section);
+      if (g.photos.length > PREVIEW) {
+        const more = document.createElement("a");
+        more.className = "reel-row__item reel-row__more";
+        more.href = albumUrl(g);
+        more.innerHTML = `<span><strong>+${g.photos.length - PREVIEW}</strong>View all ${countText(g)}</span>`;
+        track.appendChild(more);
+      }
+      reelsHost.appendChild(section);
       animateRow(section, track, gi % 2 === 0 ? -1 : 1);
     });
-    if (typeof ScrollTrigger !== "undefined") {
-      window.addEventListener("load", () => ScrollTrigger.refresh());
-      host.querySelectorAll("img").forEach((img) => img.addEventListener("load", () => ScrollTrigger.refresh(), { once: true }));
-    }
   }
 
   // The row is a native horizontal scroller, so touch swipes, trackpads and the
@@ -103,41 +133,102 @@
     });
   }
 
-  /* ---------- lightbox ---------- */
-  const box = document.getElementById("lightbox");
-  const boxImg = box.querySelector("img");
-  const boxCap = box.querySelector(".lightbox__caption");
-  let current = 0;
-  let opener = null;
+  /* ---------- gallery-album.html: every photo in one group ---------- */
+  function renderAlbum(groups) {
+    const slug = new URLSearchParams(location.search).get("g");
+    const g = groups.find((x) => x.slug === slug);
+    if (!g) {
+      location.replace("gallery.html");
+      return;
+    }
+    document.title = `${g.title} — Gallery — PMR Bike Couriers`;
+    document.getElementById("album-title").innerHTML = titleHtml(g.title);
+    document.getElementById("album-sub").textContent = [g.caption, countText(g)].filter(Boolean).join(" · ");
+    const heroBg = document.querySelector(".page-hero__bg");
+    if (heroBg && g.photos[0]) heroBg.src = g.photos[0].src;
 
-  function openBox(i) {
-    opener = document.activeElement;
-    show(i);
-    box.classList.add("is-open");
-    document.body.style.overflow = "hidden";
-    box.querySelector(".lightbox__close").focus();
+    const hero = document.querySelector(".page-hero");
+    hero.dataset.review = "album-" + g.slug + "-hero";
+    hero.dataset.reviewLabel = `Gallery album: ${g.title} heading`;
+    albumHost.dataset.review = "album-" + g.slug;
+    albumHost.dataset.reviewLabel = `Gallery album: ${g.title} photos`;
+
+    const grid = document.createElement("div");
+    grid.className = "album-grid";
+    const box = lightbox(g.photos.map((p) => ({ ...p, group: g.title })));
+    g.photos.forEach((p, i) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "album-grid__item";
+      btn.id = `photo-${i + 1}`;
+      btn.setAttribute("aria-label", "View photo full size: " + (p.alt || g.title));
+      btn.innerHTML = `<img src="${encodeURI(thumbOf(p))}" alt="${esc(p.alt || "")}" loading="lazy">`;
+      btn.addEventListener("click", () => box.open(i));
+      grid.appendChild(btn);
+    });
+    albumHost.appendChild(grid);
+
+    // links to the other groups
+    const nav = document.getElementById("album-others");
+    groups.filter((x) => x !== g).forEach((x) => {
+      const a = document.createElement("a");
+      a.className = "album-pill";
+      a.href = albumUrl(x);
+      a.innerHTML = `<img src="${encodeURI(thumbOf(x.photos[0]))}" alt="" loading="lazy"><span>${esc(x.title)}<small>${countText(x)}</small></span>`;
+      nav.appendChild(a);
+    });
+
+    const m = location.hash.match(/^#photo-(\d+)$/);
+    if (m && g.photos[m[1] - 1]) box.open(m[1] - 1);
   }
-  function closeBox() {
-    box.classList.remove("is-open");
-    document.body.style.overflow = "";
-    opener?.focus();
+
+  /* ---------- lightbox ---------- */
+  function lightbox(items) {
+    const box = document.getElementById("lightbox");
+    const boxImg = box.querySelector("img");
+    const boxCap = box.querySelector(".lightbox__caption");
+    let current = 0;
+    let opener = null;
+
+    function open(i) {
+      opener = document.activeElement;
+      show(i);
+      box.classList.add("is-open");
+      document.body.style.overflow = "hidden";
+      box.querySelector(".lightbox__close").focus();
+    }
+    function close() {
+      box.classList.remove("is-open");
+      document.body.style.overflow = "";
+      opener?.focus();
+    }
+    function show(i) {
+      current = (i + items.length) % items.length;
+      boxImg.src = items[current].src;
+      boxImg.alt = items[current].alt;
+      boxCap.textContent = `${items[current].alt || items[current].group} · ${current + 1} of ${items.length}`;
+    }
+    box.querySelector(".lightbox__close").addEventListener("click", close);
+    box.querySelector(".lightbox__prev").addEventListener("click", () => show(current - 1));
+    box.querySelector(".lightbox__next").addEventListener("click", () => show(current + 1));
+    box.addEventListener("click", (e) => { if (e.target === box) close(); });
+    document.addEventListener("keydown", (e) => {
+      if (!box.classList.contains("is-open")) return;
+      if (e.key === "Escape") close();
+      if (e.key === "ArrowLeft") show(current - 1);
+      if (e.key === "ArrowRight") show(current + 1);
+    });
+    // swipe left or right on a phone to move between photos
+    let touchX = null;
+    box.addEventListener("touchstart", (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+    box.addEventListener("touchend", (e) => {
+      if (touchX === null) return;
+      const dx = e.changedTouches[0].clientX - touchX;
+      touchX = null;
+      if (Math.abs(dx) > 50) show(current + (dx < 0 ? 1 : -1));
+    });
+    return { open };
   }
-  function show(i) {
-    current = (i + all.length) % all.length;
-    boxImg.src = all[current].src;
-    boxImg.alt = all[current].alt;
-    boxCap.textContent = [all[current].group, all[current].alt].filter(Boolean).join(" · ");
-  }
-  box.querySelector(".lightbox__close").addEventListener("click", closeBox);
-  box.querySelector(".lightbox__prev").addEventListener("click", () => show(current - 1));
-  box.querySelector(".lightbox__next").addEventListener("click", () => show(current + 1));
-  box.addEventListener("click", (e) => { if (e.target === box) closeBox(); });
-  document.addEventListener("keydown", (e) => {
-    if (!box.classList.contains("is-open")) return;
-    if (e.key === "Escape") closeBox();
-    if (e.key === "ArrowLeft") show(current - 1);
-    if (e.key === "ArrowRight") show(current + 1);
-  });
 
   function esc(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
